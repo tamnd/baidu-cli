@@ -1,4 +1,7 @@
-// Command baidu is a single-binary command line for Baidu.
+// Command baidu is the single-binary command line for baidu-cli. It hands the
+// kit App to kit.Run, which builds the CLI, the HTTP API (baidu serve), and the
+// MCP server (baidu mcp) from the one operation registry and maps errors to
+// stable exit codes.
 package main
 
 import (
@@ -7,7 +10,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/charmbracelet/fang"
+	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/baidu-cli/cli"
 )
 
@@ -15,11 +18,5 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	root := cli.Root()
-	if err := fang.Execute(ctx, root,
-		fang.WithVersion(cli.Version),
-		fang.WithNotifySignal(os.Interrupt, syscall.SIGTERM),
-	); err != nil {
-		os.Exit(1)
-	}
+	os.Exit(kit.Run(ctx, cli.NewApp()))
 }
