@@ -8,6 +8,8 @@ weight: 10
 Baidu through its public surfaces and prints clean structured records you can
 pipe into your tools. No API key is required.
 
+![baidu reading the hot board into a table and piping suggest through jq](/demo.gif)
+
 ## Read operations, three ways
 
 The read operations are defined once and exposed three ways:
