@@ -1,0 +1,14 @@
+title       = "tago-doks"
+baseURL     = "https://tago-doks.tamnd.com/"
+description = "A clean documentation theme for tago, styled after Doks."
+contentDir  = "content"
+outputDir   = "public"
+theme       = "tago-doks"
+syntaxHighlight = "true"
+
+[params]
+github = "https://github.com/tamnd/tago-doks"
+heroTitle = "tago-doks"
+heroLead = "A fast, searchable documentation theme for tago. No Node, no build step, just templates and one stylesheet."
+heroPrimaryURL = "/getting-started/installation/"
+heroPrimaryText = "Get started"

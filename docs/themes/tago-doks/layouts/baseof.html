@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="{{.Page.Lang}}">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{if and .Page.Title (ne .Page.Kind "home")}}{{.Page.Title}} | {{.Site.Title}}{{else}}{{.Site.Title}}{{end}}</title>
+  {{if .Page.Description}}<meta name="description" content="{{.Page.Description}}">{{else if .Site.Description}}<meta name="description" content="{{.Site.Description}}">{{end}}
+  {{if .Page.NoIndex}}<meta name="robots" content="noindex, nofollow">{{else}}<meta name="robots" content="index, follow">{{end}}
+  <link rel="canonical" href="{{.Page.RelPermalink | absURL}}">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="{{if and .Page.Title (ne .Page.Kind "home")}}{{.Page.Title}}{{else}}{{.Site.Title}}{{end}}">
+  {{if .Page.Description}}<meta property="og:description" content="{{.Page.Description}}">{{end}}
+  <link rel="icon" href="{{"/favicon.svg" | absURL}}" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+  <link rel="stylesheet" href="{{.Assets.CSS | absURL}}">
+  {{if .Assets.ChromaCSS}}<link rel="stylesheet" href="{{.Assets.ChromaCSS | absURL}}">{{end}}
+  <script>
+  // Set the theme before paint to avoid a flash of the wrong color scheme.
+  (function(){
+    try {
+      var t = localStorage.getItem('doks-theme');
+      if (!t) t = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.setAttribute('data-theme', t);
+    } catch (e) {}
+  })();
+  window.DOKS = {
+    baseURL: "{{.Site.BaseURL}}",
+    searchURL: "{{"/en.search-data.json" | absURL}}"
+  };
+  </script>
+</head>
+<body>
+<a class="doks-skip" href="#doks-main">Skip to content</a>
+
+<header class="doks-navbar">
+  <div class="doks-navbar__inner">
+    <button type="button" class="doks-iconbtn doks-navbar__burger" id="doks-burger" aria-label="Toggle navigation" aria-expanded="false">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    </button>
+    <a class="doks-brand" href="{{"/" | absURL}}">
+      <span class="doks-brand__mark" aria-hidden="true">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 7v10l8 4 8-4V7l-8-4-8 4z"/><path d="M4 7l8 4 8-4"/><path d="M12 11v10"/></svg>
+      </span>
+      <span class="doks-brand__name">{{.Site.Title}}</span>
+    </a>
+
+    <div class="doks-search" id="doks-search">
+      <svg class="doks-search__icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" id="doks-search-input" class="doks-search__input" placeholder="Search docs" autocomplete="off" spellcheck="false" aria-label="Search documentation">
+      <div class="doks-search__results" id="doks-search-results" hidden></div>
+    </div>
+
+    <nav class="doks-navbar__actions">
+      {{with .Site.Params.github}}
+      <a class="doks-iconbtn" href="{{.}}" title="GitHub repository" aria-label="GitHub repository" rel="noopener" target="_blank">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 .5C5.7.5.5 5.7.5 12c0 5.1 3.3 9.4 7.9 10.9.6.1.8-.2.8-.6v-2c-3.2.7-3.9-1.4-3.9-1.4-.5-1.3-1.3-1.7-1.3-1.7-1.1-.7.1-.7.1-.7 1.2.1 1.8 1.2 1.8 1.2 1 1.8 2.8 1.3 3.5 1 .1-.8.4-1.3.7-1.6-2.6-.3-5.3-1.3-5.3-5.7 0-1.3.5-2.3 1.2-3.1-.1-.3-.5-1.5.1-3.1 0 0 1-.3 3.3 1.2a11.5 11.5 0 0 1 6 0c2.3-1.5 3.3-1.2 3.3-1.2.6 1.6.2 2.8.1 3.1.8.8 1.2 1.8 1.2 3.1 0 4.4-2.7 5.4-5.3 5.7.4.4.8 1.1.8 2.2v3.3c0 .3.2.7.8.6 4.6-1.5 7.9-5.8 7.9-10.9C23.5 5.7 18.3.5 12 .5z"/></svg>
+      </a>
+      {{end}}
+      <button type="button" class="doks-iconbtn" id="doks-theme-btn" title="Toggle dark mode" aria-label="Toggle dark mode">
+        <svg class="doks-icon-sun" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="2" x2="12" y2="4"/><line x1="12" y1="20" x2="12" y2="22"/><line x1="4.5" y1="4.5" x2="6" y2="6"/><line x1="18" y1="18" x2="19.5" y2="19.5"/><line x1="2" y1="12" x2="4" y2="12"/><line x1="20" y1="12" x2="22" y2="12"/><line x1="4.5" y1="19.5" x2="6" y2="18"/><line x1="18" y1="6" x2="19.5" y2="4.5"/></svg>
+        <svg class="doks-icon-moon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+      </button>
+    </nav>
+  </div>
+</header>
+
+<div class="doks-backdrop" id="doks-backdrop"></div>
+
+<div class="doks-shell">
+  <aside class="doks-sidebar" id="doks-sidebar">
+    <nav class="doks-nav" aria-label="Documentation">
+      {{$cur := .Page.RelPermalink}}
+      {{range (where .Site.Pages "Kind" "section").ByWeight}}
+      {{$sec := .Section}}
+      <div class="doks-nav__group">
+        <p class="doks-nav__title">{{with .LinkTitle}}{{.}}{{else}}{{.Title}}{{end}}</p>
+        <ul class="doks-nav__list">
+          {{range (where $.Site.Pages "Section" $sec).ByWeight}}
+          {{if eq .Kind "page"}}
+          <li><a class="doks-nav__link{{if eq .RelPermalink $cur}} is-active{{end}}" href="{{.RelPermalink | absURL}}">{{with .LinkTitle}}{{.}}{{else}}{{.Title}}{{end}}</a></li>
+          {{end}}
+          {{end}}
+        </ul>
+      </div>
+      {{end}}
+    </nav>
+  </aside>
+
+  <div class="doks-content">
+    <main class="doks-main" id="doks-main">
+      {{template "page-main" .}}
+    </main>
+    <aside class="doks-toc" id="doks-toc" hidden>
+      <div class="doks-toc__inner">
+        <p class="doks-toc__title">On this page</p>
+        <nav id="doks-toc-nav" aria-label="On this page"></nav>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/flexsearch@0.7.43/dist/flexsearch.bundle.js" defer></script>
+<script src="{{.Assets.JS | absURL}}" defer></script>
+{{template "page-live-reload" .}}
+</body>
+</html>

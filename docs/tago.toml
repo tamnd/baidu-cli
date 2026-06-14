@@ -1,0 +1,10 @@
+title       = "baidu"
+baseURL     = "https://baidu-cli.tamnd.com/"
+description = "A command line for Baidu."
+contentDir  = "content"
+outputDir   = "public"
+theme       = "tago-doks"
+syntaxHighlight = "true"
+
+[params]
+github = "https://github.com/tamnd/baidu-cli"

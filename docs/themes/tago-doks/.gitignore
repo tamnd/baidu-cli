@@ -1,0 +1,7 @@
+# Build output and cache from the example site
+exampleSite/public/
+exampleSite/public-sub/
+exampleSite/public-pages/
+exampleSite/public-cf/
+exampleSite/.tago-cache.db
+**/.tago-cache.db

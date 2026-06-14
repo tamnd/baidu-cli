@@ -1,0 +1,30 @@
+{{define "page-main"}}
+<article class="doks-article">
+  {{if .Page.Ancestors}}
+  <nav class="doks-breadcrumb" aria-label="Breadcrumb">
+    {{range .Page.Ancestors}}{{if ne .Kind "home"}}<a href="{{.RelPermalink | absURL}}">{{with .LinkTitle}}{{.}}{{else}}{{.Title}}{{end}}</a><span class="doks-breadcrumb__sep" aria-hidden="true">/</span>{{end}}{{end}}
+    <span class="doks-breadcrumb__current">{{.Page.Title}}</span>
+  </nav>
+  {{end}}
+
+  <header class="doks-article__head">
+    <h1>{{.Page.Title}}</h1>
+    {{with .Page.Description}}<p class="doks-article__lead">{{.}}</p>{{end}}
+  </header>
+
+  {{if .Page.ContentHTML}}<div class="doks-prose">{{rawHTML .Page.ContentHTML}}</div>{{end}}
+
+  {{if .Pages}}
+  <div class="doks-cards">
+    {{range .Pages.ByWeight}}
+    {{if and (not .Draft) (eq .Kind "page")}}
+    <a class="doks-card" href="{{.RelPermalink | absURL}}">
+      <span class="doks-card__title">{{with .LinkTitle}}{{.}}{{else}}{{.Title}}{{end}}</span>
+      {{with .Description}}<span class="doks-card__desc">{{.}}</span>{{end}}
+    </a>
+    {{end}}
+    {{end}}
+  </div>
+  {{end}}
+</article>
+{{end}}

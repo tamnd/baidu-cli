@@ -1,0 +1,26 @@
+{{define "page-main"}}
+<div class="doks-home">
+  <section class="doks-hero">
+    <h1 class="doks-hero__title">{{with .Page.Params.heroTitle}}{{.}}{{else}}{{.Site.Title}}{{end}}</h1>
+    <p class="doks-hero__lead">{{with .Page.Params.heroLead}}{{.}}{{else}}{{.Site.Description}}{{end}}</p>
+    <div class="doks-hero__cta">
+      {{with .Page.Params.heroPrimaryURL}}<a class="doks-btn doks-btn--primary" href="{{. | absURL}}">{{with $.Page.Params.heroPrimaryText}}{{.}}{{else}}Get started{{end}}</a>{{end}}
+      {{with .Site.Params.github}}<a class="doks-btn doks-btn--ghost" href="{{.}}" rel="noopener" target="_blank">View on GitHub</a>{{end}}
+    </div>
+  </section>
+
+  {{if .Page.ContentHTML}}<div class="doks-prose doks-home__body">{{rawHTML .Page.ContentHTML}}</div>{{end}}
+
+  {{$features := where (where .Site.Pages "Kind" "section").ByWeight "Params.featured" true}}
+  {{if $features}}
+  <section class="doks-features">
+    {{range $features}}
+    <a class="doks-feature" href="{{.RelPermalink | absURL}}">
+      <span class="doks-feature__title">{{with .LinkTitle}}{{.}}{{else}}{{.Title}}{{end}}</span>
+      {{with .Description}}<span class="doks-feature__desc">{{.}}</span>{{end}}
+    </a>
+    {{end}}
+  </section>
+  {{end}}
+</div>
+{{end}}

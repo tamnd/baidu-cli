@@ -1,0 +1,40 @@
+{{define "page-main"}}
+<article class="doks-article">
+  {{if .Page.Ancestors}}
+  <nav class="doks-breadcrumb" aria-label="Breadcrumb">
+    {{range .Page.Ancestors}}{{if ne .Kind "home"}}<a href="{{.RelPermalink | absURL}}">{{with .LinkTitle}}{{.}}{{else}}{{.Title}}{{end}}</a><span class="doks-breadcrumb__sep" aria-hidden="true">/</span>{{end}}{{end}}
+    <span class="doks-breadcrumb__current">{{.Page.Title}}</span>
+  </nav>
+  {{end}}
+
+  <header class="doks-article__head">
+    <h1>{{.Page.Title}}</h1>
+    {{with .Page.Description}}<p class="doks-article__lead">{{.}}</p>{{end}}
+  </header>
+
+  <div class="doks-prose" id="doks-prose">{{rawHTML .Page.ContentHTML}}</div>
+
+  {{if .Page.ReadingTime}}
+  <footer class="doks-article__foot">
+    <span class="doks-article__meta">{{.Page.ReadingTime}} min read</span>
+  </footer>
+  {{end}}
+
+  {{if or .PrevPage .NextPage}}
+  <nav class="doks-pager" aria-label="Previous and next page">
+    {{if .PrevPage}}
+    <a class="doks-pager__link doks-pager__link--prev" href="{{.PrevPage.RelPermalink | absURL}}">
+      <span class="doks-pager__dir">Previous</span>
+      <span class="doks-pager__title">{{with .PrevPage.LinkTitle}}{{.}}{{else}}{{.PrevPage.Title}}{{end}}</span>
+    </a>
+    {{else}}<span></span>{{end}}
+    {{if .NextPage}}
+    <a class="doks-pager__link doks-pager__link--next" href="{{.NextPage.RelPermalink | absURL}}">
+      <span class="doks-pager__dir">Next</span>
+      <span class="doks-pager__title">{{with .NextPage.LinkTitle}}{{.}}{{else}}{{.NextPage.Title}}{{end}}</span>
+    </a>
+    {{end}}
+  </nav>
+  {{end}}
+</article>
+{{end}}

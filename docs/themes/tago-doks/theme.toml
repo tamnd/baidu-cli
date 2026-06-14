@@ -1,0 +1,13 @@
+name = "tago-doks"
+license = "MIT"
+licenselink = "https://github.com/tamnd/tago-doks/blob/main/LICENSE"
+description = "A clean documentation theme for tago, styled after Doks."
+homepage = "https://github.com/tamnd/tago-doks"
+demosite = "https://dbrest.tamnd.com"
+tags = ["documentation", "docs", "clean", "dark mode", "search"]
+features = ["documentation", "sidebar navigation", "table of contents", "dark mode", "full-text search"]
+min_version = "0.1.0"
+
+[author]
+  name = "Tam Nguyen Duc"
+  homepage = "https://github.com/tamnd"
