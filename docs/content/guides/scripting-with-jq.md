@@ -17,5 +17,8 @@ baidu hot | jq 'select(.tag == "新") | .word'
 baidu hot --tab movie -n 5 -o csv
 
 # Get suggestion words only
-baidu suggest -Q "AI" | jq -r '.word'
+baidu suggest "AI" | jq -r '.word'
+
+# Pull a few fields from one Baike article (when reachable; geo-walled)
+baidu article 北京 | jq '{title, abstract}'
 ```
