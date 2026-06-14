@@ -2,24 +2,31 @@
 title: "baidu"
 description: "A command line for Baidu."
 heroTitle: "Baidu, from the command line"
-heroLead: "A command line for Baidu. One pure-Go binary, no API key, output that pipes into the rest of your tools."
+heroLead: "A command line for Baidu. One pure-Go binary, no API key. Reads the hot board, suggest, web search, and the Baike encyclopedia, and serves the same operations over HTTP and MCP."
 heroPrimaryURL: "/getting-started/quick-start/"
 heroPrimaryText: "Get started"
 ---
 
-`baidu` reads Baidu through the open hot search and suggest APIs, both
-key-free, and prints clean records you can read at a terminal or pipe into
-the next tool.
+`baidu` reads Baidu through its public surfaces: the hot search board, the
+typeahead suggest API, web search results, and the Baike (百度百科)
+encyclopedia. No API key is required. It prints clean records you can read at
+a terminal or pipe into the next tool, and it serves the same read operations
+over HTTP (`baidu serve`) and MCP (`baidu mcp`).
 
 ```bash
-baidu hot                       # realtime hot search (top 30)
+baidu hot                       # realtime hot search board, in rank order
 baidu hot --tab movie -n10      # top 10 movie searches
-baidu suggest --query golang    # 10 autocomplete suggestions
+baidu suggest golang            # typeahead suggestions for a query
 baidu hot -o url                # just the URLs
 ```
 
 Output is a table when you are at a terminal and JSONL when you pipe, so
 `baidu hot | jq` works with no flags.
+
+Some surfaces are walled by IP and region. `hot` and `suggest` are open
+anywhere; `search` is CAPTCHA-walled (best effort) and Baike (`article`,
+`categories`) is geo-walled (works from China IPs). The tool detects each
+block and exits cleanly instead of faking data.
 
 ## Where to go next
 

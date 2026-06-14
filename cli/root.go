@@ -1,149 +1,67 @@
-// Package cli builds the baidu command tree on top of the baidu library.
+// Package cli builds the baidu command tree on top of the baidu library and the
+// any-cli/kit framework. The lookup commands are declared once as kit operations
+// in the baidu package, so the CLI, the HTTP API (baidu serve), and the MCP
+// server (baidu mcp) all derive from one registry. The mirror subsystem is wired
+// here as escape-hatch commands, since a stateful crawl does not fit the
+// emit-records shape of an operation.
 package cli
 
 import (
-	"fmt"
 	"os"
 
-	"github.com/mattn/go-isatty"
-	"github.com/spf13/cobra"
+	"github.com/tamnd/any-cli/kit"
 	"github.com/tamnd/baidu-cli/baidu"
 )
 
-// Build metadata, injected via -ldflags at release time.
+// Build metadata, set via -ldflags at release time.
 var (
 	Version = "dev"
 	Commit  = "none"
 	Date    = "unknown"
 )
 
-// exit codes.
-const (
-	exitError  = 1
-	exitUsage  = 2
-	exitNoData = 3
-)
-
-// ExitError carries a process exit code up to main.
-type ExitError struct {
-	Code int
-	Err  error
+// builder holds the domain-global flags while the app is assembled, then folds
+// them onto the resolved config in finalize.
+type builder struct {
+	userAgent string
+	baiduID   string
 }
 
-func (e *ExitError) Error() string {
-	if e.Err != nil {
-		return e.Err.Error()
-	}
-	return fmt.Sprintf("exit %d", e.Code)
+// NewApp assembles the kit App: the baidu domain installs the client factory and
+// the lookup operations, this package adds the mirror and version commands, and
+// kit provides the CLI, API, and MCP surfaces.
+func NewApp() *kit.App {
+	b := &builder{}
+	id := baidu.Identity()
+	id.Version = Version
+
+	app := kit.New(id, kit.WithDefaults(baidu.Defaults))
+	app.GlobalFlags(b.globals)
+	app.Finalize(b.finalize)
+
+	baidu.Domain{}.Register(app)
+	registerMirror(app)
+	app.AddCommand(versionCmd())
+	return app
 }
 
-func (e *ExitError) Unwrap() error { return e.Err }
-
-func codeError(code int, err error) error { return &ExitError{Code: code, Err: err} }
-
-// App holds shared state threaded through every command.
-type App struct {
-	client *baidu.Client
-	cfg    baidu.Config
-
-	output   string
-	fields   []string
-	noHeader bool
-	template string
-	limit    int
-	quiet    bool
+func (b *builder) globals(f *kit.FlagSet) {
+	f.StringVar(&b.userAgent, "user-agent", baidu.DefaultUserAgent, "User-Agent sent with each request")
+	f.StringVar(&b.baiduID, "baiduid", "", "BAIDUID cookie for the web search surface (or $BAIDU_BAIDUID)")
 }
 
-// Root builds the root command and its subtree.
-func Root() *cobra.Command {
-	app := &App{cfg: baidu.DefaultConfig()}
-
-	root := &cobra.Command{
-		Use:   "baidu",
-		Short: "A command line for Baidu.",
-		Long: `baidu reads Baidu through the open hot search and suggest APIs.
-No API key is required. It returns records as table, JSON, JSONL, CSV, TSV,
-or URLs.
-
-baidu is an independent tool and is not affiliated with Baidu, Inc.`,
-		SilenceUsage:  true,
-		SilenceErrors: true,
-		PersistentPreRunE: func(cmd *cobra.Command, _ []string) error {
-			return app.setup()
-		},
+func (b *builder) finalize(c *kit.Config) {
+	if c.Extra == nil {
+		c.Extra = map[string]string{}
 	}
-
-	pf := root.PersistentFlags()
-	pf.StringVarP(&app.output, "output", "o", "auto", "output: table|json|jsonl|csv|tsv|url|raw (auto=table on TTY, jsonl piped)")
-	pf.StringSliceVar(&app.fields, "fields", nil, "comma-separated columns to include")
-	pf.BoolVar(&app.noHeader, "no-header", false, "omit the header row in table/csv/tsv")
-	pf.StringVar(&app.template, "template", "", "Go text/template applied per record")
-	pf.IntVarP(&app.limit, "limit", "n", 0, "limit number of records (0 = command default)")
-	pf.BoolVarP(&app.quiet, "quiet", "q", false, "suppress progress on stderr")
-
-	pf.DurationVar(&app.cfg.Rate, "delay", app.cfg.Rate, "minimum spacing between requests")
-	pf.DurationVar(&app.cfg.Timeout, "timeout", app.cfg.Timeout, "per-request timeout")
-	pf.IntVar(&app.cfg.Retries, "retries", app.cfg.Retries, "retry attempts on 429/5xx")
-	pf.StringVar(&app.cfg.UserAgent, "user-agent", app.cfg.UserAgent, "User-Agent sent with each request")
-
-	root.AddCommand(
-		app.hotCmd(),
-		app.suggestCmd(),
-		newVersionCmd(),
-	)
-	return root
-}
-
-func (a *App) setup() error {
-	if a.output == "" || a.output == "auto" {
-		if isatty.IsTerminal(os.Stdout.Fd()) {
-			a.output = string(FormatTable)
-		} else {
-			a.output = string(FormatJSONL)
-		}
+	if b.userAgent != "" {
+		c.Extra["user-agent"] = b.userAgent
 	}
-	if !Format(a.output).Valid() {
-		return codeError(exitUsage, fmt.Errorf("unknown output format %q", a.output))
+	id := b.baiduID
+	if id == "" {
+		id = os.Getenv("BAIDU_BAIDUID")
 	}
-	a.client = baidu.NewClient(a.cfg)
-	return nil
-}
-
-func (a *App) render(records any) error {
-	r := NewRenderer(os.Stdout, Format(a.output), a.fields, a.noHeader, a.template)
-	return r.Render(records)
-}
-
-func (a *App) renderOrEmpty(records any, n int) error {
-	if err := a.render(records); err != nil {
-		return err
+	if id != "" {
+		c.Extra["baiduid"] = id
 	}
-	if n == 0 {
-		return codeError(exitNoData, nil)
-	}
-	return nil
-}
-
-func (a *App) progressf(format string, args ...any) {
-	if a.quiet {
-		return
-	}
-	_, _ = fmt.Fprintf(os.Stderr, format+"\n", args...)
-}
-
-func mapFetchErr(err error) error {
-	if err == nil {
-		return nil
-	}
-	if isNotFound(err) {
-		return codeError(exitNoData, err)
-	}
-	return codeError(exitError, err)
-}
-
-func (a *App) effectiveLimit(def int) int {
-	if a.limit > 0 {
-		return a.limit
-	}
-	return def
 }

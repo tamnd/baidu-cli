@@ -56,7 +56,7 @@ nfpms:
       - rpm
       - apk
 
-dockers:
+dockers_v2:
   - images:
       - ghcr.io/tamnd/baidu
     tags:

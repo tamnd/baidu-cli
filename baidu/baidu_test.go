@@ -11,31 +11,37 @@ import (
 )
 
 func TestHot(t *testing.T) {
+	// The realtime board nests items a second level deep: cards[].content[]
+	// holds groups, and each group carries its own content[] of items.
 	payload := map[string]any{
 		"data": map[string]any{
 			"cards": []any{
 				map[string]any{
 					"content": []any{
 						map[string]any{
-							"isTop": true,
-							"word":  "pinned item",
-							"url":   "https://m.baidu.com/s?word=pinned+item",
-						},
-						map[string]any{
-							"isTop":      false,
-							"index":      1,
-							"word":       "hot item",
-							"url":        "https://m.baidu.com/s?word=hot+item",
-							"hotTag":     "3",
-							"newHotName": "",
-						},
-						map[string]any{
-							"isTop":      false,
-							"index":      2,
-							"word":       "new item",
-							"url":        "https://m.baidu.com/s?word=new+item",
-							"hotTag":     "1",
-							"newHotName": "新",
+							"content": []any{
+								map[string]any{
+									"isTop": true,
+									"word":  "pinned item",
+									"url":   "https://m.baidu.com/s?word=pinned+item",
+								},
+								map[string]any{
+									"isTop":      false,
+									"index":      1,
+									"word":       "hot item",
+									"url":        "https://m.baidu.com/s?word=hot+item",
+									"hotTag":     "3",
+									"newHotName": "",
+								},
+								map[string]any{
+									"isTop":      false,
+									"index":      2,
+									"word":       "new item",
+									"url":        "https://m.baidu.com/s?word=new+item",
+									"hotTag":     "1",
+									"newHotName": "新",
+								},
+							},
 						},
 					},
 				},
@@ -125,7 +131,8 @@ func TestHotLimit(t *testing.T) {
 
 func TestSuggest(t *testing.T) {
 	ts := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		_, _ = w.Write([]byte(`cb({"q":"test","s":["alpha","beta","gamma"]});`))
+		w.Header().Set("Content-Type", "application/json")
+		_, _ = w.Write([]byte(`{"q":"test","p":false,"g":[{"type":"sug","q":"alpha"},{"type":"sug","q":"beta"},{"type":"sug","q":"gamma"}]}`))
 	}))
 	defer ts.Close()
 
